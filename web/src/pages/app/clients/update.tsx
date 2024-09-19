@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
-import clsx from 'clsx'
 import { ArrowLeft } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { useForm } from 'react-hook-form'
@@ -11,25 +10,61 @@ import { z } from 'zod'
 import { getClient } from '@/api/get-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { queryClient } from '@/lib/react-query'
 import { updateClient } from '@/api/update-client'
 import { formatISO } from 'date-fns'
 
 const updateClientSchema = z.object({
-  code: z.string().min(1, 'Código é obrigatório.'),
-  name: z.string().min(1, 'Nome é obrigatório.'),
-  document: z.string().min(1, 'Documento é obrigatório.'),
-  zipcode: z.string().min(1, 'CEP é obrigatório.'),
-  address: z.string().min(1, 'Endereço é obrigatório.'),
-  number: z.string().min(1, 'Número é obrigatório.'),
-  district: z.string().min(1, 'Bairro é obrigatório.'),
-  city: z.string().min(1, 'Cidade é obrigatória.'),
-  uf: z.string().min(2, 'UF é obrigatório.').max(2, 'UF é somente 2 letras.'),
+  code: z.string().min(1, {
+    message: 'Código é obrigatório.',
+  }),
+  name: z.string().min(1, {
+    message: 'Nome é obrigatório.',
+  }),
+  document: z.string().min(1, {
+    message: 'Documento é obrigatório.',
+  }),
+  zipcode: z.string().min(1, {
+    message: 'CEP é obrigatório.',
+  }),
+  address: z.string().min(1, {
+    message: 'Endereço é obrigatório.',
+  }),
+  number: z.string().min(1, {
+    message: 'Número é obrigatório.',
+  }),
+  district: z.string().min(1, {
+    message: 'Bairro é obrigatório.',
+  }),
+  city: z.string().min(1, {
+    message: 'Cidade é obrigatória.',
+  }),
+  uf: z
+    .string()
+    .min(2, {
+      message: 'UF é obrigatório.',
+    })
+    .max(2, {
+      message: 'UF é somente 2 letras.',
+    }),
   complement: z.string(),
-  phone: z.string().min(1, 'Telefone é obrigatório.'),
-  credit_limit: z.string().min(1, 'Limite de crédito é obrigatório.'),
-  valid: z.date().transform((str) => new Date(str)),
+  phone: z.string().min(1, {
+    message: 'Telefone é obrigatório.',
+  }),
+  credit_limit: z.string().min(1, {
+    message: 'Limite de crédito é obrigatório.',
+  }),
+  valid: z.string().min(1, {
+    message: 'Validade é obrigatória.',
+  }),
 })
 
 type UpdateClientSchema = z.infer<typeof updateClientSchema>
@@ -47,13 +82,7 @@ export function UpdateClient() {
     queryFn: () => getClient(client_id),
   })
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    setFocus,
-    formState: { isSubmitting, errors },
-  } = useForm<UpdateClientSchema>({
+  const form = useForm<UpdateClientSchema>({
     resolver: zodResolver(updateClientSchema),
     values: {
       name: client?.name!,
@@ -77,12 +106,12 @@ export function UpdateClient() {
     fetch(`https://viacep.com.br/ws/${zipcode}/json/`, { mode: 'cors' })
       .then((res) => res.json())
       .then((data) => {
-        setValue('address', data.logradouro)
-        setValue('district', data.bairro)
-        setValue('complement', data.complemento)
-        setValue('city', data.localidade)
-        setValue('uf', data.uf)
-        setFocus('number')
+        form.setValue('address', data.logradouro)
+        form.setValue('district', data.bairro)
+        form.setValue('complement', data.complemento)
+        form.setValue('city', data.localidade)
+        form.setValue('uf', data.uf)
+        form.setFocus('number')
       })
   }
 
@@ -145,197 +174,210 @@ export function UpdateClient() {
           </Button>
         </div>
 
-        <form
-          onSubmit={handleSubmit(handleUpdateClient)}
-          className="flex flex-col gap-4"
-        >
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-4">
-              <Label className="flex flex-col gap-3">
-                <span className="text-md font-semibold">Nome</span>
-                <Input
-                  className={clsx(errors.name ? 'border-rose-500' : '')}
-                  placeholder="Nome do cliente"
-                  {...register('name')}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleUpdateClient)}
+            className="flex flex-col gap-4"
+          >
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome do cliente" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {errors.name && (
-                  <p className="text-xs text-rose-500">{errors.name.message}</p>
-                )}
-              </Label>
 
-              <Label className="flex flex-col gap-3">
-                <span className="text-md font-semibold">Código</span>
-                <Input
-                  className={clsx(errors.code ? 'border-rose-500' : '')}
-                  placeholder="Código"
-                  {...register('code')}
+                <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Código</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Código" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {errors.code && (
-                  <p className="text-xs text-rose-500">{errors.code.message}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="document"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documento</FormLabel>
+                      <FormControl>
+                        <Input placeholder="CPF ou CNPJ" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telefone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Telefone" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="zipcode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CEP</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="CEP"
+                        {...field}
+                        onBlur={(e) => handleGetAddress(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </Label>
+              />
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Endereço</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome da Rua" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Número</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Número" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="complement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Complemento</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Complemento" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="district"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bairro</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Bairro" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cidade</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Cidade" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="uf"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>UF</FormLabel>
+                    <FormControl>
+                      <Input placeholder="UF" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="credit_limit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Limite de Crédito</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Limite de Crédito" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="valid"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Validade</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Validade" type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Label className="flex flex-col gap-3">
-                <span className="text-md font-semibold">Documento</span>
-                <Input
-                  className={clsx(errors.document ? 'border-rose-500' : '')}
-                  placeholder="CPF ou CNPJ"
-                  {...register('document')}
-                />
-                {errors.document && (
-                  <p className="text-xs text-rose-500">
-                    {errors.document.message}
-                  </p>
-                )}
-              </Label>
-
-              <Label className="flex flex-col gap-3">
-                <span className="text-md font-semibold">Telefone</span>
-                <Input
-                  className={clsx(errors.phone ? 'border-rose-500' : '')}
-                  placeholder="Telefone"
-                  {...register('phone')}
-                  onBlur={() => {}}
-                />
-                {errors.phone && (
-                  <p className="text-xs text-rose-500">
-                    {errors.phone.message}
-                  </p>
-                )}
-              </Label>
+            <div className="flex justify-end">
+              <Button disabled={form.formState.isSubmitting} type="submit">
+                Cadastrar
+              </Button>
             </div>
-
-            <Label className="flex flex-col gap-3">
-              <span className="text-md font-semibold">CEP</span>
-              <Input
-                className={clsx(errors.zipcode ? 'border-rose-500' : '')}
-                placeholder="CEP"
-                {...register('zipcode')}
-                onBlur={(e) => handleGetAddress(e.target.value)}
-              />
-              {errors.zipcode && (
-                <p className="text-xs text-rose-500">
-                  {errors.zipcode.message}
-                </p>
-              )}
-            </Label>
-
-            <Label className="flex flex-col gap-3">
-              <span className="text-md font-semibold">Endereço</span>
-              <Input
-                className={clsx(errors.address ? 'border-rose-500' : '')}
-                placeholder="Nome da Rua"
-                {...register('address')}
-              />
-              {errors.address && (
-                <p className="text-xs text-rose-500">
-                  {errors.address.message}
-                </p>
-              )}
-            </Label>
-
-            <Label className="flex flex-col gap-3">
-              <span className="text-md font-semibold">Número</span>
-              <Input
-                className={clsx(errors.number ? 'border-rose-500' : '')}
-                placeholder="Número"
-                {...register('number')}
-              />
-              {errors.number && (
-                <p className="text-xs text-rose-500">{errors.number.message}</p>
-              )}
-            </Label>
-
-            <Label className="flex flex-col gap-3">
-              <span className="text-md font-semibold">Complemento</span>
-              <Input
-                className={clsx(errors.complement ? 'border-rose-500' : '')}
-                placeholder="Complemento"
-                {...register('complement')}
-              />
-              {errors.complement && (
-                <p className="text-xs text-rose-500">
-                  {errors.complement.message}
-                </p>
-              )}
-            </Label>
-
-            <Label className="flex flex-col gap-3">
-              <span className="text-md font-semibold">Bairro</span>
-              <Input
-                className={clsx(errors.district ? 'border-rose-500' : '')}
-                placeholder="Bairro"
-                {...register('district')}
-              />
-              {errors.district && (
-                <p className="text-xs text-rose-500">
-                  {errors.district.message}
-                </p>
-              )}
-            </Label>
-
-            <Label className="flex flex-col gap-3">
-              <span className="text-md font-semibold">Cidade</span>
-              <Input
-                className={clsx(errors.city ? 'border-rose-500' : '')}
-                placeholder="Cidade"
-                {...register('city')}
-              />
-              {errors.city && (
-                <p className="text-xs text-rose-500">{errors.city.message}</p>
-              )}
-            </Label>
-
-            <Label className="flex flex-col gap-3">
-              <span className="text-md font-semibold">UF</span>
-              <Input
-                className={clsx(errors.uf ? 'border-rose-500' : '')}
-                placeholder="UF"
-                {...register('uf')}
-              />
-              {errors.uf && (
-                <p className="text-xs text-rose-500">{errors.uf.message}</p>
-              )}
-            </Label>
-
-            <Label className="flex flex-col gap-3">
-              <span className="text-md font-semibold">Limite de Crédito</span>
-              <Input
-                className={clsx(errors.credit_limit ? 'border-rose-500' : '')}
-                placeholder="Limite de Crédito"
-                {...register('credit_limit')}
-              />
-              {errors.credit_limit && (
-                <p className="text-xs text-rose-500">
-                  {errors.credit_limit.message}
-                </p>
-              )}
-            </Label>
-
-            <Label className="flex flex-col gap-3">
-              <span className="text-md font-semibold">Validade</span>
-              <Input
-                className={clsx(errors.valid ? 'border-rose-500' : '')}
-                placeholder="Validade"
-                type="date"
-                {...register('valid', {
-                  valueAsDate: true,
-                })}
-              />
-              {errors.valid && (
-                <p className="text-xs text-rose-500">{errors.valid.message}</p>
-              )}
-            </Label>
-          </div>
-
-          <div className="flex justify-end">
-            <Button disabled={isSubmitting} type="submit">
-              Atualizar
-            </Button>
-          </div>
-        </form>
+          </form>
+        </Form>
       </div>
     </>
   )}
