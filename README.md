@@ -31,6 +31,9 @@ npm install
 # Rodando a imagem do docker
 docker compose up -d
 
+# Rodando as migrations do bando de dados
+npx prisma migrate deploy
+
 # Subir o servidor HTTP
 npm run start:dev
 ```
