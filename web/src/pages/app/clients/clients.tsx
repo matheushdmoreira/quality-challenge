@@ -42,41 +42,47 @@ export function Clients() {
           </Button>
         </div>
 
-        <div className="space-y-2.5">
-          <ClientTableFilters />
+        {clients && clients?.length > 0 ? (
+          <div className="space-y-2.5">
+            <ClientTableFilters />
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px] text-center">
-                    Código
-                  </TableHead>
-                  <TableHead className="w-[140px]">Documento</TableHead>
-                  <TableHead className="w-[400px]">Endereço</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead className="w-[140px] text-center">
-                    Telefone
-                  </TableHead>
-                  <TableHead className="w-[180px] text-center">
-                    Cadastrado em
-                  </TableHead>
-                  <TableHead className="w-[140px] text-center">
-                    Validade
-                  </TableHead>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px] text-center">
+                      Código
+                    </TableHead>
+                    <TableHead className="w-[140px]">Documento</TableHead>
+                    <TableHead className="w-[400px]">Endereço</TableHead>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead className="w-[140px] text-center">
+                      Telefone
+                    </TableHead>
+                    <TableHead className="w-[180px] text-center">
+                      Cadastrado em
+                    </TableHead>
+                    <TableHead className="w-[140px] text-center">
+                      Validade
+                    </TableHead>
 
-                  <TableHead className="w-[80px]"></TableHead>
-                  <TableHead className="w-[80px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {clients?.map((client) => (
-                  <ClientTableRow key={client.id} client={client} />
-                ))}
-              </TableBody>
-            </Table>
+                    <TableHead className="w-[80px]"></TableHead>
+                    <TableHead className="w-[80px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {clients?.map((client) => (
+                    <ClientTableRow key={client.id} client={client} />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
-        </div>
+        ) : (
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Ainda não existem usuários cadastrados.
+          </p>
+        )}
       </div>
     </>
   )
