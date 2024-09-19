@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Outlet } from 'react-router-dom'
 
 import { AppLayout } from '@/pages/_layouts/app'
 import { Clients } from '@/pages/app/clients/clients'
@@ -15,9 +15,15 @@ export const router = createBrowserRouter([
     errorElement: <NotFound />,
     children: [
       { path: '/', element: <Dashboard /> },
-      { path: '/clients', element: <Clients /> },
-      { path: '/clients/create', element: <CreateClient /> },
-      { path: '/clients/:id', element: <UpdateClient /> },
+      {
+        path: '/clients',
+        element: <Outlet />,
+        children: [
+          { index: true, element: <Clients /> },
+          { path: '/clients/create', element: <CreateClient /> },
+          { path: '/clients/:id', element: <UpdateClient /> },
+        ],
+      },
     ],
   },
 ])
