@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { Trash, UserPen } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { removeClient } from '@/api/delete-client'
 import { Button } from '@/components/ui/button'
@@ -31,8 +32,18 @@ interface ClientTableRowProps {
 export function ClientTableRow({ client }: ClientTableRowProps) {
   const queryClient = useQueryClient()
 
+  async function handleRemoveClient({ clientId }: { clientId: number }) {
+    try {
+      await removeClient({ clientId })
+
+      toast.success('Cliente removido com sucesso.')
+    } catch (error) {
+      toast.error('Erro ao remover cliente.')
+    }
+  }
+
   const { mutateAsync: removeClientFn } = useMutation({
-    mutationFn: removeClient,
+    mutationFn: handleRemoveClient,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clients'] })
     },
